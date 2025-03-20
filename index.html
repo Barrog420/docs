@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vstupní Test Inizio</title>
+</head>
+<body>
+
+    <!-- Nadpis, kterým se můžu vrátit a vymazat výsledky -->
+    <h2 onclick="clearResults()">Pojďme najít to, co hledáš!</h2>
+
+    <!-- Pole pro zadání dotazu -->
+    <label for="query">Co hledáš dnes?</label>
+    <input type="text" id="query" placeholder="Zadej co tě zajímá...">
+    <button onclick="search()">Hledat</button>
+    
+    <!-- Tlačítko pro stáhnutí vyhledávání. -->
+    <button onclick="download()">Stáhnout výsledky</button>
+
+    <!-- Zobrazení výsledků -->
+    <ul id="resultsList"></ul>
+
+    <script>
+        // Můj Google API klíč a CSE ID
+        const apiKey = 'AIzaSyCoPyPW2o666Wrf8KBTicykGeoYGbg1T2M';
+        const cx = 'b5a7c068647b94f28';
+
+        // Funkce pro vyhledávání
+        function search() {
+            // Získání dotazu z inputu
+            let query = document.getElementById("query").value;
+
+            if (query != '') {
+                const url = `https://www.googleapis.com/customsearch/v1?q=${encodeURIComponent(query)}&key=${apiKey}&cx=${cx}&num=10`;
+
+                // Vyvolání API pro získání výsledků
+                fetch(url)
+                    .then(response => response.json())
+                    .then(data => {
+                        // Získané výsledky
+                        let resultList = document.getElementById("resultsList");
+                        resultList.innerHTML = '';  // Vyčistění předchozích výsledků
+
+                        data.items.forEach(item => {
+                            // Seznamu pro každý výsledek
+                            let li = document.createElement("li");
+                            li.innerHTML = `<a href="${item.link}" target="_blank">${item.title}</a><br>${item.snippet}`;
+                            resultList.appendChild(li);
+                        });
+                    })
+                    .catch(error => {
+                        // Ošetření pokud by nastala chyba
+                        console.log('Chyba při získávání dat:', error);
+                    });
+            } else {
+                alert("Prosím zadejte dotaz pro hledání!");
+            }
+        }
+
+        // Funkce pro smazání výsledků a inputu
+        function clearResults() {
+            document.getElementById("query").value = '';  
+            document.getElementById("resultsList").innerHTML = '';  
+        }
+
+        // Funkce pro stažení výsledků do souboru JSON
+        function download() {
+            let data = document.getElementById("resultsList").innerText;  
+            let file = new Blob([data], {type: 'application/json'});  
+
+            let link = document.createElement("a");
+            link.href = URL.createObjectURL(file);
+            link.download = "google_results.json";  // Název souboru
+            link.click();  // Spustí stažení
+        }
+    </script>
+
+</body>
+</html>
